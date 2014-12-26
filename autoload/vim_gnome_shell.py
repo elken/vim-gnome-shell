@@ -9,7 +9,7 @@ from gi.repository import Gio
 class GnomeShell(object):
 
     def __init__(self):
-        self.json = open('/home/elken/.vim/bundle/vim-gnome-shell/autoload/metadata.json')
+        self.json = open('metadata.json')
         self.data = json.load(self.json)
         self.json.close()
 
