@@ -18,12 +18,12 @@ function! GetCWD()
 endfunction
 
 function! s:VGSInit()
-    execute 'pyfile ' . s:plugin_path . '/vim-gnome-shell.py'
+    execute 'pyfile ' . s:plugin_path . '/vim_gnome_shell.py'
     python initVGS()
 endfunction
 
 function! s:OutputAll()
-    call VGSInit()
+    call s:VGSInit()
     echo GetCWD()
     echo g:uuid
     echo g:name
