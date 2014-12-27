@@ -1,1 +1,5 @@
 command! -nargs=0 VGS call vim_gnome_shell#VGS()
+command! -nargs=0 VGSEnable call vim_gnome_shell#VGSEnable()
+command! -nargs=0 VGSDisable call vim_gnome_shell#VGSDisable()
+command! -nargs=0 VGSUpdateState call vim_gnome_shell#VGSUpdateState()
+command! -nargs=0 VGSCheck call vim_gnome_shell#VGSAuCheck()

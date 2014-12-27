@@ -9,7 +9,11 @@ from gi.repository import Gio
 class GnomeShell(object):
 
     def __init__(self):
-        self.json = open('metadata.json')
+        try:
+            self.json = open('metadata.json')
+        except IOError, e:
+            return 
+
         self.data = json.load(self.json)
         self.json.close()
 
@@ -59,14 +63,65 @@ class GnomeShell(object):
         self.settings.set_strv('enabled-extensions', self.extensions)
         print self.uuid + " is now disabled." 
 
-#g = GnomeShell()
+g
 
-#print vim.eval('g:uuid')
-#print g.getName()
-#state = g.getState()
-#print state and "Enabled" or "Disabled"
+def reset():
+    vim.command("let g:vim_gnome_shell#uuid = ''")
+    vim.command("let g:vim_gnome_shell#name = ''")
+    vim.command("let g:vim_gnome_shell#cwd = ''")
+    vim.command("let g:vim_gnome_shell#state = ''")
 
 def initVGS():
+    reset()
     g = GnomeShell()
-    vim.command("let g:uuid = '%s'" % g.getUUID())
-    vim.command("let g:name = '%s'" % g.getName())
+    try:
+        vim.command("let g:vim_gnome_shell#uuid = '%s'" % g.getUUID())
+        vim.command("let g:vim_gnome_shell#name = '%s'" % g.getName())
+    except AttributeError, e:
+        print "g is not defined, unable to find metadata.json"
+        vim.command("let g:vim_gnome_shell#loaded = 0")
+    else:
+        vim.command("let g:vim_gnome_shell#loaded = 1")
+
+def VGSEnable():
+    try:
+        g.enableExtension()
+    except AttributeError, e:
+        print "g is not defined, unable to find metadata.json"
+        vim.command("let g:vim_gnome_shell#loaded = 0")
+    else:
+        vim.command("let g:vim_gnome_shell#loaded = 1")
+
+def VGSDisable():
+    try:
+        g.disableExtension()
+    except AttributeError, e:
+        print "g is not defined, unable to find metadata.json"
+        vim.command("let g:vim_gnome_shell#loaded = 0")
+    else:
+        vim.command("let g:vim_gnome_shell#loaded = 1")
+
+def VGSUpdateState():
+    try:
+        vim.command("let g:vim_gnome_shell#state = %d" % g.getState())
+    except AttributeError, e:
+        print "g is not defined, unable to find metadata.json"
+        vim.command("let g:vim_gnome_shell#loaded = 0")
+    else:
+        vim.command("let g:vim_gnome_shell#loaded = 1")
+
+def VGSIsExtensionDir():
+    try:
+        vim.command("call s:SetCWD()")
+        cwd = vim.eval("g:vim_gnome_shell#cwd")
+        cwd = cwd[:-1]
+        uuid = g.getUUID()
+        if cwd == uuid:
+            return 1
+        else:
+            return 0
+    except AttributeError, e:
+        print "g is not defined, unable to find metadata.json"
+        vim.command("let g:vim_gnome_shell#loaded = 0")
+    else:
+        vim.command("let g:vim_gnome_shell#loaded = 1")
