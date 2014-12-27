@@ -1,18 +1,18 @@
 #!/usr/bin/env python
-import string
 import json
-import sys
 import os
+import vim
 
 from gi.repository import Gio
 
+
 class GnomeShell(object):
 
-    def __init__(self):
+    def init(self):
         try:
             self.json = open('metadata.json')
-        except IOError, e:
-            return 
+        except IOError:
+            return
 
         self.data = json.load(self.json)
         self.json.close()
@@ -22,7 +22,7 @@ class GnomeShell(object):
         self.desc = self.data['description']
         try:
             self.url = self.data['url']
-        except KeyError, e:
+        except KeyError:
             print "No URL in metadata.json"
             self.url = "none"
 
@@ -49,7 +49,10 @@ class GnomeShell(object):
             return 0
 
     def hasPrefs(self):
-        return os.path.exists(os.path.join(os.environ['HOME'],".local/share/gnome-shell/extensions/",self.uuid,"prefs.js"))
+        return os.path.exists(
+            os.path.join(os.environ['HOME'],
+                         ".local/share/gnome-shell/extensions/",
+                         self.uuid, "prefs.js"))
 
     def openPrefs(self):
         if self.hasPrefs():
@@ -59,70 +62,68 @@ class GnomeShell(object):
 
     def enableExtension(self):
         if self.getState() == 1:
-            print self.uuid + " is already enabled." 
+            print self.uuid + " is already enabled."
             return
 
         self.extensions.append(self.uuid)
         self.settings.set_strv('enabled-extensions', self.extensions)
-        print self.uuid + " is now enabled." 
+        print self.uuid + " is now enabled."
 
     def disableExtension(self):
         if self.getState() == 0:
-            print self.uuid + " is not enabled or installed." 
+            print self.uuid + " is not enabled or installed."
             return
 
         while self.uuid in self.extensions:
             self.extensions.remove(self.uuid)
 
         self.settings.set_strv('enabled-extensions', self.extensions)
-        print self.uuid + " is now disabled." 
+        print self.uuid + " is now disabled."
 
-g
+g = GnomeShell()
 
-def reset():
-    vim.command("let g:vim_gnome_shell_uuid = ''")
-    vim.command("let g:vim_gnome_shell_name = ''")
-    vim.command("let g:vim_gnome_shell_cwd = ''")
-    vim.command("let g:vim_gnome_shell_state = ''")
 
 def initVGS():
-    reset()
-    g = GnomeShell()
+    g.init()
     try:
         vim.command("let g:vim_gnome_shell_uuid = '%s'" % g.getUUID())
         vim.command("let g:vim_gnome_shell_name = '%s'" % g.getName())
-    except AttributeError, e:
-        print "g is not defined, unable to find metadata.json"
+    except AttributeError:
+        print "Object not loaded, can't init"
         vim.command("let g:vim_gnome_shell_loaded = 0")
     else:
         vim.command("let g:vim_gnome_shell_loaded = 1")
+
 
 def VGSEnable():
     try:
         g.enableExtension()
-    except AttributeError, e:
-        print "g is not defined, unable to find metadata.json"
+    except AttributeError:
+        print "Object not loaded, can't enable"
         vim.command("let g:vim_gnome_shell_loaded = 0")
     else:
         vim.command("let g:vim_gnome_shell_loaded = 1")
+
 
 def VGSDisable():
     try:
         g.disableExtension()
-    except AttributeError, e:
-        print "g is not defined, unable to find metadata.json"
+    except AttributeError:
+        print "Object not loaded, can't disable"
         vim.command("let g:vim_gnome_shell_loaded = 0")
     else:
         vim.command("let g:vim_gnome_shell_loaded = 1")
 
+
 def VGSUpdateState():
     try:
         vim.command("let g:vim_gnome_shell_state = %d" % g.getState())
-    except AttributeError, e:
-        print "g is not defined, unable to find metadata.json"
+    except AttributeError:
+        print "Object not loaded, can't update state"
         vim.command("let g:vim_gnome_shell_loaded = 0")
     else:
         vim.command("let g:vim_gnome_shell_loaded = 1")
+
 
 def VGSIsExtensionDir():
     try:
@@ -134,20 +135,23 @@ def VGSIsExtensionDir():
             return 1
         else:
             return 0
-    except AttributeError, e:
-        print "g is not defined, unable to find metadata.json"
+    except AttributeError:
+        print "Object not loaded, can't check if dir"
         vim.command("let g:vim_gnome_shell_loaded = 0")
     else:
         vim.command("let g:vim_gnome_shell_loaded = 1")
 
+
 def normal(str):
     vim.command("normal "+str)
+
 
 def insert(arg):
     for i in arg:
         normal("o")
         vim.current.line = i
-    
+
+
 def append(arg):
     for i in arg:
         vim.current.line = vim.current.line + i + " "
