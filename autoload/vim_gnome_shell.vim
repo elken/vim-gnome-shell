@@ -6,24 +6,24 @@ endif
 let s:plugin_path = escape(expand('<sfile>:p:h'), '\')
 execute 'pyfile ' . s:plugin_path . '/vim_gnome_shell.py'
 
-if !exists("g:vim_gnome_shell#uuid")
-    let g:vim_gnome_shell#uuid=""
+if !exists("g:vim_gnome_shell_uuid")
+    let g:vim_gnome_shell_uuid=""
 endif
 
-if !exists("g:vim_gnome_shell#name")
-    let g:vim_gnome_shell#name=""
+if !exists("g:vim_gnome_shell_name")
+    let g:vim_gnome_shell_name=""
 endif
 
-if !exists("g:vim_gnome_shell#cwd")
-    let g:vim_gnome_shell#cwd=""
+if !exists("g:vim_gnome_shell_cwd")
+    let g:vim_gnome_shell_cwd=""
 endif
 
-if !exists("g:vim_gnome_shell#state")
-    let g:vim_gnome_shell#state=0
+if !exists("g:vim_gnome_shell_state")
+    let g:vim_gnome_shell_state=0
 endif
 
-if !exists("g:vim_gnome_shell#loaded")
-    let g:vim_gnome_shell#loaded=1
+if !exists("g:vim_gnome_shell_loaded")
+    let g:vim_gnome_shell_loaded=1
 endif
 
 function! s:GetCWD()
@@ -31,7 +31,7 @@ function! s:GetCWD()
 endfunction
 
 function! s:SetCWD()
-    let g:vim_gnome_shell#cwd = s:GetCWD()
+    let g:vim_gnome_shell_cwd = s:GetCWD()
 endfunction
 
 function! vim_gnome_shell#VGSAuCheck()
@@ -48,19 +48,24 @@ function! vim_gnome_shell#VGSDisable()
     python VGSUpdateState()
 endfunction
 
-function! vim_gnome_shell#VGSUpdateState()
-    python VGSUpdateState()
+function! vim_gnome_shell#VGSInsert(...)
+    python insert(vim.eval("a:000"))
+endfunction
+
+function! vim_gnome_shell#VGSAppend(...)
+    python append(vim.eval("a:000"))
 endfunction
 
 function! vim_gnome_shell#VGS()
-    python initVGS()
-    let g:vim_gnome_shell#cwd = s:GetCWD()
-    if(g:vim_gnome_shell#loaded)
+    if(g:vim_gnome_shell_loaded)
+        python initVGS()
+        python VGSUpdateState()
+        let g:vim_gnome_shell_cwd = s:GetCWD()
         call s:SetCWD()
-        echo g:vim_gnome_shell#cwd
-        echo g:vim_gnome_shell#uuid
-        echo g:vim_gnome_shell#name
-        echo g:vim_gnome_shell#state
+        echo "CWD:" g:vim_gnome_shell_cwd
+        echo "UUID:" g:vim_gnome_shell_uuid
+        echo "Name:" g:vim_gnome_shell_name
+        echo "State:" g:vim_gnome_shell_state
     else
         return
     endif
