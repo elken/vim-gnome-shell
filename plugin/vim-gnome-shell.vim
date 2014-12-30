@@ -7,3 +7,5 @@ command! -nargs=0 VGSInsertName call vim_gnome_shell#Insert(g:vim_gnome_shell_na
 command! -nargs=0 VGSAppendUUID call vim_gnome_shell#Append(g:vim_gnome_shell_uuid)
 command! -nargs=0 VGSAppendName call vim_gnome_shell#Append(g:vim_gnome_shell_name)
 command! -nargs=0 VGSToggle call vim_gnome_shell#Toggle()
+
+nnoremap <F8> :VGS<CR>:VGSToggle<CR>

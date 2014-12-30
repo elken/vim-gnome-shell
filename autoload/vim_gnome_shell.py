@@ -142,6 +142,16 @@ def VGSIsExtensionDir():
         vim.command("let g:vim_gnome_shell_loaded = 1")
 
 
+def VGSOpenPrefs():
+    try:
+        g.openPrefs()
+    except AttributeError:
+        print "Object not loaded, can't open prefs"
+        vim.command("let g:vim_gnome_shell_loaded = 0")
+    else:
+        vim.command("let g:vim_gnome_shell_loaded = 1")
+
+
 def normal(str):
     vim.command("normal "+str)
 
@@ -155,3 +165,18 @@ def insert(arg):
 def append(arg):
     for i in arg:
         vim.current.line = vim.current.line + i + " "
+
+
+def populate():
+    vim.command('setlocal modifiable')
+    b = vim.current.buffer
+    del b[:]
+    b[0] = "\" Normal movement keys to move about"
+    if g.hasPrefs:
+        b.append("\" Press n to open preferences window for " + g.getUUID())
+    b.append("\" q to quit")
+    b.append("Name: " + g.getName())
+    b.append("UUID: " + g.getUUID())
+    b.append("Description: " + g.getDesc())
+    b.append("State: " + str(g.getState() if "Enabled" else "Disabled"))
+    vim.command('setlocal nomodifiable')
