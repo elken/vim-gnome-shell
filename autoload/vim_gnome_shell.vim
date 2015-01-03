@@ -109,7 +109,8 @@ function! vim_gnome_shell#Open() "{{{
     setlocal norelativenumber
 
     nnoremap <buffer> n :py VGSOpenPrefs()<CR>
-    nnoremap <buffer> t :py VGSToggle()<CR>
+    nnoremap <buffer> t :py VGSToggleState()<CR>:call vim_gnome_shell#Populate()<CR>
+    nnoremap <buffer> m :call vim_gnome_shell#Zip()<CR>
 
     call vim_gnome_shell#Populate()
 endfunction
@@ -122,25 +123,25 @@ function! vim_gnome_shell#Close() "{{{
         quit
     endif
 endfunction "}}}
-function! vim_gnome_shell#Toggle() "{{{
-    if vim_gnome_shell#IsVisible()
-        call vim_gnome_shell#Close()
-    else
-        call vim_gnome_shell#Open()
+function! vim_gnome_shell#Zip() "{{{
+    if confirm('Create zip? (Overwrites existing zip)', "yes\nNo", 2) == 1
+        python makeZip()
     endif
 endfunction "}}}
-function! vim_gnome_shell#Init() "{{{
+function! vim_gnome_shell#Toggle() "{{{
     python initVGS()
     if(g:vim_gnome_shell_loaded == 1)
         python VGSUpdateState()
 
         call s:SetCWD()
-        "echo "CWD:" g:vim_gnome_shell_cwd
-        "echo "UUID:" g:vim_gnome_shell_uuid
-        "echo "Name:" g:vim_gnome_shell_name
-        "echo "State:" g:vim_gnome_shell_state ? 'Enabled' : 'Disabled'
     else
         return
+    endif
+
+    if vim_gnome_shell#IsVisible()
+        call vim_gnome_shell#Close()
+    else
+        call vim_gnome_shell#Open()
     endif
 endfunction
 " }}}

@@ -2,6 +2,7 @@
 import json
 import os
 import vim
+import zipfile
 
 from gi.repository import Gio
 
@@ -14,24 +15,23 @@ class GnomeShell(object):
         except IOError:
             return
 
+        self.settings = Gio.Settings(schema='org.gnome.shell')
+        self.extensions = self.settings.get_strv('enabled-extensions')
+
         self.data = json.load(self.json)
         self.json.close()
 
         self.uuid = self.data['uuid']
         self.name = self.data['name']
         self.desc = self.data['description']
+        self.url = "none"
         try:
             self.url = self.data['url']
         except KeyError:
-            print "No URL in metadata.json"
-            self.url = "none"
-
-        self.settings = Gio.Settings(schema='org.gnome.shell')
-        self.extensions = self.settings.get_strv('enabled-extensions')
+            return
 
     def getURL(self):
-        if self.url != "none":
-            return self.url
+        return self.url
 
     def getDesc(self):
         return self.desc
@@ -152,6 +152,21 @@ def VGSOpenPrefs():
         vim.command("let g:vim_gnome_shell_loaded = 1")
 
 
+def VGSToggleState():
+    try:
+        s = g.getState()
+        if s:
+            g.disableExtension()
+        else:
+            g.enableExtension()
+
+    except AttributeError:
+        print "Object not loaded, can't toggle"
+        vim.command("let g:vim_gnome_shell_loaded = 0")
+    else:
+        vim.command("let g:vim_gnome_shell_loaded = 1")
+
+
 def normal(str):
     vim.command("normal "+str)
 
@@ -171,12 +186,48 @@ def populate():
     vim.command('setlocal modifiable')
     b = vim.current.buffer
     del b[:]
-    b[0] = "\" Normal movement keys to move about"
+    b[0] = "\"h,j,k,l to keys to move about"
     if g.hasPrefs:
         b.append("\" Press n to open preferences window for " + g.getUUID())
+    b.append("\" Press m to make a zip for uploading to extensions.gnome.org")
+    b.append("\" Press t to toggle the state of the extension")
     b.append("\" q to quit")
     b.append("Name: " + g.getName())
     b.append("UUID: " + g.getUUID())
     b.append("Description: " + g.getDesc())
     b.append("State: " + str(g.getState() if "Enabled" else "Disabled"))
+    b.append("URL: " + g.getURL())
     vim.command('setlocal nomodifiable')
+
+
+def getFullTree():
+    paths = []
+
+    for tld, dirs, files in os.walk('.'):
+        for filename in files:
+            path = os.path.join(tld, filename)
+            paths.append(path)
+
+    return paths
+
+
+def makeZip():
+    try:
+        os.remove("%s.zip" % g.getUUID())
+    except OSError:
+        pass
+
+    print "Making new %s.zip" % g.getUUID()
+    zf = zipfile.ZipFile("%s.zip" % g.getUUID(), "w", zipfile.ZIP_DEFLATED)
+
+    dirs = getFullTree()
+    files = []
+
+    for d in dirs:
+        if d.find('.git') is -1:
+            if d.find('%s.zip' % g.getUUID()) is -1:
+                files.append(d)
+
+    for f in files:
+        print 'Adding %s' % f
+        zf.write(str(f))
