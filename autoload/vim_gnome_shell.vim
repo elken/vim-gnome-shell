@@ -45,16 +45,6 @@ function! vim_gnome_shell#AuCheck() "{{{
     python VGSIsExtensionDir()
 endfunction
 " }}}
-function! vim_gnome_shell#Enable() "{{{
-    python VGSEnable()
-    python VGSUpdateState()
-endfunction
-" }}}
-function! vim_gnome_shell#Disable() "{{{
-    python VGSDisable()
-    python VGSUpdateState()
-endfunction
-" }}}
 function! vim_gnome_shell#Insert(...) "{{{
     python insert(vim.eval("a:000"))
 endfunction
